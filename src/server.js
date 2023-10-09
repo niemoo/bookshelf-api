@@ -6,6 +6,7 @@ const init = async () => {
     port: 9000,
     host: 'localhost',
   });
+  // TESTING
 
   server.route(routes);
 
