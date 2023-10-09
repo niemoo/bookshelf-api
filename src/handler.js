@@ -109,6 +109,7 @@ const getBookByIdHandler = (req, h) => {
     };
   }
 
+  // IF FAILED SHOW
   const response = h.response({
     status: 'fail',
     message: 'Buku tidak ditemukan',
@@ -122,6 +123,7 @@ const getBookByIdHandler = (req, h) => {
 const editBookByIdHandler = (req, h) => {
   const { bookId } = req.params;
 
+  // GET BODY REQUEST
   const {
     name,
     year,
@@ -136,6 +138,7 @@ const editBookByIdHandler = (req, h) => {
   // SEARCH NOTES INDEX BY ID
   const index = books.findIndex((book) => book.id === bookId);
 
+  // IF ID NOT FOUND
   if (index === -1) {
     const response = h.response({
       status: 'fail',
@@ -146,6 +149,7 @@ const editBookByIdHandler = (req, h) => {
     return response;
   }
 
+  // IF NAME IS EMPTY STRING
   if (!name || name.trim() === '') {
     const response = h.response({
       status: 'fail',
@@ -156,6 +160,7 @@ const editBookByIdHandler = (req, h) => {
     return response;
   }
 
+  // IF READPAGE > PAGECOUNT
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
@@ -166,6 +171,7 @@ const editBookByIdHandler = (req, h) => {
     return response;
   }
 
+  // EDIT BOOKS DATA
   books[index] = {
     ...books[index],
     name,
@@ -188,9 +194,39 @@ const editBookByIdHandler = (req, h) => {
   return response;
 };
 
+// FUNC DELETE BOOK BY ID WITH METHOD DELETE
+const deleteBookByIdHandler = (req, h) => {
+  const { bookId } = req.params;
+
+  const index = books.findIndex((book) => book.id === bookId);
+
+  // IF SUCCESS DELETE
+  if (index !== -1) {
+    books.splice(index, 1);
+
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil dihapus',
+    });
+
+    response.code(200);
+    return response;
+  }
+
+  // IF FAILED DELETE
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku gagal dihapus. Id tidak ditemukan',
+  });
+
+  response.code(200);
+  return response;
+};
+
 module.exports = {
   addBooksHandler,
   getAllBooksHandler,
   getBookByIdHandler,
   editBookByIdHandler,
+  deleteBookByIdHandler,
 };
