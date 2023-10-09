@@ -15,10 +15,22 @@ const addBooksHandler = (req, h) => {
     reading,
   } = req.payload;
 
+  // CHECK BODY REQUEST NAME
   if (!name || name.trim() === '') {
     const response = h.response({
       status: 'fail',
       message: 'Gagal menambahkan buku. Nama buku tidak boleh kosong.',
+    });
+
+    response.code(400);
+    return response;
+  }
+
+  // CHECK BODY REQUEST READPAGE > PAGECOUNT
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
     });
 
     response.code(400);
@@ -32,6 +44,7 @@ const addBooksHandler = (req, h) => {
   const updatedAt = insertedAt;
 
   const newBook = {
+    id,
     name,
     year,
     author,
@@ -39,9 +52,8 @@ const addBooksHandler = (req, h) => {
     publisher,
     pageCount,
     readPage,
-    reading,
-    id,
     finished,
+    reading,
     insertedAt,
     updatedAt,
   };
@@ -63,16 +75,6 @@ const addBooksHandler = (req, h) => {
     response.code(201);
     return response;
   }
-
-  // Use an array of error messages for better readability
-  // const errorMessages = [];
-  // if (!name || name.trim() === '') {
-  //   errorMessages.push('Gagal menambahkan buku. Nama buku tidak boleh kosong.');
-  // }
-  // if (readPage > pageCount) {
-  //   errorMessages.push('Gagal menambahkan buku. readPage
-  // tidak boleh lebih besar dari pageCount.');
-  // }
 
   // IF FAIL ADD BOOKS
   const response = h.response({
@@ -116,4 +118,79 @@ const getBookByIdHandler = (req, h) => {
   return response;
 };
 
-module.exports = { addBooksHandler, getAllBooksHandler, getBookByIdHandler };
+// FUNC EDIT BOOK BY ID WITH METHOD PUT
+const editBookByIdHandler = (req, h) => {
+  const { bookId } = req.params;
+
+  const {
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+  } = req.payload;
+
+  // SEARCH NOTES INDEX BY ID
+  const index = books.findIndex((book) => book.id === bookId);
+
+  if (index === -1) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Id tidak ditemukan',
+    });
+
+    response.code(404);
+    return response;
+  }
+
+  if (!name || name.trim() === '') {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
+    });
+
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+
+    response.code(400);
+    return response;
+  }
+
+  books[index] = {
+    ...books[index],
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+  };
+
+  // IF SUCCESS EDIT NOTES
+  const response = h.response({
+    status: 'success',
+    message: 'Buku berhasil diperbarui',
+  });
+
+  response.code(200);
+  return response;
+};
+
+module.exports = {
+  addBooksHandler,
+  getAllBooksHandler,
+  getBookByIdHandler,
+  editBookByIdHandler,
+};
