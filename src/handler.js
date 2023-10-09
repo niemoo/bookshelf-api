@@ -19,7 +19,7 @@ const addBooksHandler = (req, h) => {
   if (!name || name.trim() === '') {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. Nama buku tidak boleh kosong.',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku',
     });
 
     response.code(400);
@@ -87,12 +87,41 @@ const addBooksHandler = (req, h) => {
 };
 
 // FUNC FOR SHOW ALL BOOKS WITH METHOD GET
-const getAllBooksHandler = () => ({
-  status: 'success',
-  data: {
-    books,
-  },
-});
+const getAllBooksHandler = (req) => {
+  const { name, finished, reading } = req.query;
+
+  let filteredBooks = books;
+
+  // GET ALL READING AND UNREADING BOOKS
+  if (reading === '1') {
+    filteredBooks = books.filter((book) => book.reading === true);
+  } else if (reading === '0') {
+    filteredBooks = books.filter((book) => book.reading === false);
+  }
+
+  // GET ALL FINISHED AND UNFINISHED BOOKS
+  if (finished === '1') {
+    filteredBooks = books.filter((book) => book.finished === true);
+  } else if (finished === '0') {
+    filteredBooks = books.filter((book) => book.finished === false);
+  }
+
+  if (name) {
+    const lowerCaseName = name.toLowerCase();
+    filteredBooks = books.filter((book) => book.name.toLowerCase().includes(lowerCaseName));
+  }
+
+  return {
+    status: 'success',
+    data: {
+      books: filteredBooks.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      })),
+    },
+  };
+};
 
 // FUNC SHOW BOOK BY ID WITH METHOD GET
 const getBookByIdHandler = (req, h) => {
@@ -219,7 +248,7 @@ const deleteBookByIdHandler = (req, h) => {
     message: 'Buku gagal dihapus. Id tidak ditemukan',
   });
 
-  response.code(200);
+  response.code(404);
   return response;
 };
 
